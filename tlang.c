@@ -16,7 +16,7 @@ typedef enum {
 
 typedef struct TOKEN {
     TOKEN_TYPE type;
-    char* value;
+    char value[ARBITRARYMAX];
 } TOKEN;
 
 char* token_type_to_string(TOKEN_TYPE token_type) {
@@ -82,18 +82,18 @@ char* lgetline(size_t* bufflen) {
     return linep;
 }
 
-TOKEN* new_token(TOKEN_TYPE, )
+TOKEN* new_token(TOKEN_TYPE, char*);
 
-void add_token(TOKEN** token_dst, TOKEN token, int* token_count) {
-    token_dst[*token_count] = &token;
-    printf("ADDED %s TOKEN\n", token_type_to_string(token_dst[*token_count]->type));
+void add_token(TOKEN token_dst[], TOKEN* token, int* token_count) {
+    token_dst[*token_count] = *token;
+    printf("ADDED %s TOKEN\n", token_type_to_string(token_dst[*token_count].type));
     ++(*token_count);
 }
 
-void print_tokens(TOKEN** tokens, int token_count) {
+void print_tokens(TOKEN tokens[], int token_count) {
     printf("Printing tokens with token count %d\n", token_count);
     for (int i = 0; i < token_count; i++) {
-        printf("TOKEN:\n\tTYPE:%s\n\tVALUE:%s\n", token_type_to_string(tokens[i]->type),tokens[i]->value);
+        printf("TOKEN:\n\tTYPE:%s\n\tVALUE:%s\n", token_type_to_string(tokens[i].type),tokens[i].value);
     }
 }
 
@@ -104,7 +104,7 @@ int main() {
     int token_count = 0;
     TOKEN token_array[TOKENMAX];
     TOKEN_TYPE cur_token_type;
-    
+    char* cur_token_value = malloc(ARBITRARYMAX*sizeof(char));
     //  REPL
     for (;;) {
         read = lgetline(&bufflen);
@@ -150,16 +150,17 @@ int main() {
                 case '{':
                     cur_token_type = LEFT_BRACKET;
                     break;
-                }
+                
                 default:
                     cur_token_type = UNDEFINED;
-            }
+		}    
+		}
             
-            add_token(tokensptr, create_token(cur_token_type, '\0'), &token_count);
+            add_token(token_array, new_token(cur_token_type, '\0'), &token_count);
             printf("LAST%c\n", read[i]);
-            print_tokens(tokensptr, token_count);
+            print_tokens(token_array, token_count);
         }
 
     }
-    free(tokensptr);
+    
 }
